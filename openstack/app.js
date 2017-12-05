@@ -190,7 +190,7 @@ router.get('/line',function * (){
                                         timeAry:timeAry});
 });
 
-app.use(serve('./views'));
+app.use(serve('./'));
 app.use(router.middleware());
 server.listen(3000, function () {
   console.log('listening on port 3000');

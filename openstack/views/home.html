@@ -5,14 +5,20 @@
   <meta charset="utf-8">
   <title>感測值統計系統</title>
   <script src="/socket.io/socket.io.js"></script>
-  <script src='https://code.jquery.com/jquery-3.1.1.min.js'></script>
+  <!-- <script src='https://code.jquery.com/jquery-3.1.1.min.js'></script>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css">
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script> -->
+  <!-- 掛載jquery -->
+  <script src="/views/jquery/jquery-3.2.1.min.js"></script>
+  <!-- 掛載CSS樣式 -->
+  <link rel="stylesheet" href="/views/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/views/bootstrap/css/bootstrap-theme.min.css">
+  <!-- 掛載JS樣式 -->
+  <script src="/views/bootstrap/js/bootstrap.min.js"></script>
   <style>
     body {
-      background: url(/img/background.jpg) no-repeat center center fixed;
+      background: url(/views/img/background.jpg) no-repeat center center fixed;
       background-size: cover;
     }
 
@@ -38,7 +44,7 @@
     }
   </style>
   <script>
-    var socket = io.connect('http://10.28.120.33:3000'); // 連線至伺服器
+    var socket = io.connect('http://127.0.0.1:3000'); // 連線至伺服器
 
      socket.on('dustDensity', function (data) {
       $('#dustDensity').text(data.data)
