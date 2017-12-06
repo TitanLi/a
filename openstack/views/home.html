@@ -44,7 +44,7 @@
     }
   </style>
   <script>
-    var socket = io.connect('http://127.0.0.1:3000'); // 連線至伺服器
+    var socket = io.connect('http://192.168.8.101:3000'); // 連線至伺服器
 
      socket.on('dustDensity', function (data) {
       $('#dustDensity').text(data.data)
