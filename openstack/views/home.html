@@ -18,12 +18,21 @@
   <script src="/views/bootstrap/js/bootstrap.min.js"></script>
   <style>
     body {
-      background: url(/views/img/background.jpg) no-repeat center center fixed;
+      background: url(/views/img/pic.png) no-repeat center center fixed;
       background-size: cover;
     }
+/*   .pic{
+        height:10cm;
+	background-image: url(/views/img/pic.png);
+    }
+*/
 
-    h3 {
+    h2{
+	color: #524C4C;
+    }
+    h3,h4 {
       color: #524C4C;
+  	display: inline;
     }
 
     .P_color {
@@ -37,14 +46,20 @@
       display: inline;
     }
     .barColor{
-      background:rgb(12, 14, 14);
+      background:rgb(233, 233, 233);
     }
     a{
-      color:rgb(238, 229, 230);
+      color:rgb(200,200,200);
     }
-  </style>
+    .margin-top-cm{
+      margin-top:5cm;	
+    }
+   .padding-left{
+      padding-left: 180px;
+    } 
+ </style>
   <script>
-    var socket = io.connect('http://192.168.8.101:3000'); // 連線至伺服器
+    var socket = io.connect('http://10.20.0.68:3000'); // 連線至伺服器
 
      socket.on('dustDensity', function (data) {
       $('#dustDensity').text(data.data)
@@ -86,44 +101,50 @@
        <li role="presentation"><a href="/line">Line</a></li>
       </ul>
     </div>
-    <div class="row col-md-5 col-md-offset-3 col-sm-6 col-sm-offset-2 col-xs-8 col-xs-offset-1">
-      <div class="row">
-        <h3>Humidity and Temperature:</h3>
-        <p>目前溫度:</p>
-        <p id="temp"></p>
-        <p>*C</p>
+    <div>
+    <div class="row col-md-4">
+        
+    </div>
+    <div class="col-md-5 col-sm-6 col-sm-offset-2 col-xs-8 col-xs-offset-1">
+      <div class="row margin-top-cm">
+        <h2>Humidity and Temperature:</h2>
         <br>
-        <p>目前濕度:</p>
-        <p id="humi"></p>
-        <p> %</p>
+        <h4>目前溫度:</h4>
+        <h4 id="temp"></h4>
+        <h4>*C</h4>
+        <br>
+        <h4>目前濕度:</h4>
+        <h4 id="humi"></h4>
+        <h4> %</h4>
       </div>
 
       <div class="row">
         <hr>
-        <h3>Alternating current:</h2>
-          <p>目前電流:</p>
-          <p id="date"></p>
-          <p>A ( 安培 )</p>
+        <h2>Alternating current:</h2>
           <br>
-          <p>目前使用度數:</p>
-          <p id="power"></p>
-          <p>度</p>
+          <h4>目前電流:</h4>
+          <h4 id="date"></h4>
+          <h4>A ( 安培 )</h4>
           <br>
-          <p>目前每度費率:</p>
-          <p id="cost"></p>
-          <p>元</p>
+          <h4>目前使用度數:</h4>
+          <h4 id="power"></h4>
+          <h4>度</h4>
           <br>
-          <p>目前應繳金額:</p>
-          <p id="money"></p>
-          <p>元</p>
+          <h4>目前每度費率:</h4>
+          <h4 id="cost"></h4>
+          <h4>元</h4>
+          <br>
+          <h4>目前應繳金額:</h4>
+          <h4 id="money"></h4>
+          <h4>元</h4>
           <br>
           <br>
           <input type="text" id="price" placeholder="update price value"></input>
           <input type="button" value="送出" class="btn btn-default" onclick="javascript:data() "></input>
       </div>
     </div>
+    </div>
   </div>
   </div>
 </body>
-
 </html>
