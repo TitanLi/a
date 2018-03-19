@@ -190,6 +190,15 @@ router.get('/line',function * (){
                                         timeAry:timeAry});
 });
 
+router.get('/icinga',function * (){
+    this.body = {
+      "humi" : humi,
+      "temp" : temp,
+      "currents" : currents,
+      "power" : power
+    }
+});
+
 app.use(serve('./'));
 app.use(router.middleware());
 server.listen(3000, function () {
