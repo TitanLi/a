@@ -137,7 +137,7 @@ router.get('/', function* index() {
         }
       }
     ]).toArray(function(err, results) {
-      power = results.power*220/3600/1000;
+      power = results[0].power*220/3600/1000;
       done();
     });
   }
