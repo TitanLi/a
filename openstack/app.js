@@ -116,21 +116,32 @@ io.sockets.on('connection', function (client) {
 
 router.get('/', function* index() {
   var collection = db.collection('datas');
+  // yield function(done){
+  //   var countPower = 0;
+  //   collection.find({}).toArray(function (err, data) {
+  //       // console.log(data);
+  //       for(var i=0 ; i<data.length ; i++){
+  //         countPower = countPower + data[i].Currents*220/3600/1000;
+  //       }
+  //       console.log(countPower);
+  //       power=countPower;
+  //       done();
+  //   });
+  // }
   yield function(done){
-    var countPower = 0;
-    collection.find({}).toArray(function (err, data) {
-        // console.log(data);
-        for(var i=0 ; i<data.length ; i++){
-          countPower = countPower + data[i].Currents*220/3600/1000;
+    collection.aggregate([
+      {
+        $group:{
+          _id:null,
+          power:{$sum:"$Currents"}
         }
-        console.log(countPower);
-        power=countPower;
-        done();
-    });
-    // setTimeout(function(){
-    //   done();
-    // },6000);
+      }
+    ]).toArray(function(err, results) {
+      power = results.power*220/3600/1000;
+      done();
+    };
   }
+  console.log(power);
   this.body = yield render('home');
 });
 
