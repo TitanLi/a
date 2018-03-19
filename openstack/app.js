@@ -1,7 +1,7 @@
 var koa = require('koa');
 var Router = require('koa-router');
 var logger = require('koa-logger');
-var mqtt  = require('mqtt');            //192.168.8.126
+var mqtt  = require('mqtt');
 var views = require('co-views');
 var MongoClient = require('mongodb').MongoClient;
 var ObjectId = require('mongodb').ObjectID;
@@ -13,14 +13,14 @@ var config = require('./config.js');
 var render = require('./lib/render.js');
 var db;
 
-MongoClient.connect("mongodb://127.0.0.1:27017/sensors",function(err,pDb){
+MongoClient.connect(config.mongodb,function(err,pDb){
   if(err){
     return console.dir(err);
   }
   db = pDb;
 });
 
-var mqttClient  = mqtt.connect('mqtt://127.0.0.1');
+var mqttClient  = mqtt.connect(config.MQTT);
 mqttClient.on('connect', function () {
   console.log('on connect');
   mqttClient.subscribe('current');
