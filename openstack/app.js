@@ -1,17 +1,22 @@
-var koa = require('koa');
-var Router = require('koa-router');
-var logger = require('koa-logger');
-var mqtt  = require('mqtt');
-var views = require('co-views');
-var MongoClient = require('mongodb').MongoClient;
-var ObjectId = require('mongodb').ObjectID;
-var app = koa();
-var server = require('http').createServer(app.callback());
-var io = require('socket.io')(server);
-var serve = require('koa-static');
-var config = require('./config.js');
-var render = require('./lib/render.js');
-var db;
+const koa = require('koa');
+const Router = require('koa-router');
+const logger = require('koa-logger');
+const mqtt  = require('mqtt');
+const views = require('co-views');
+const MongoClient = require('mongodb').MongoClient;
+const ObjectId = require('mongodb').ObjectID;
+const app = koa();
+const router = new Router();
+const server = require('http').createServer(app.callback());
+const io = require('socket.io')(server);
+const serve = require('koa-static');
+const config = require('./config.js');
+const render = require('./lib/render.js');
+const db;
+const mqttClient  = mqtt.connect(config.MQTT);
+
+app.use(logger());
+app.use(serve('./'));
 
 MongoClient.connect(config.mongodb,function(err,pDb){
   if(err){
@@ -20,17 +25,14 @@ MongoClient.connect(config.mongodb,function(err,pDb){
   db = pDb;
 });
 
-var mqttClient  = mqtt.connect(config.MQTT);
 mqttClient.on('connect', function () {
   console.log('on connect');
   mqttClient.subscribe('current');
 });
 
-var router = new Router();
-app.use(logger());
-
 // define init value
 var power = 0;
+var powerTotal = 0;
 var money = 0;
 var price = 1.63;
 var humi = 0;
@@ -51,36 +53,33 @@ function plusdata(){
     console.log('insert ok');
 };
 //mongo data find
-function showdata() {
-    var collection = db.collection('datas');
-    collection.find({}).toArray(function (err, data) {
-        for (var i = 0; i < data.length; i++) {
-            currents[i] = data[i].Currents,
-                temp[i] = data[i].Temperature,
-                humi[i] = data[i].Humidity,
-                time[i] = data[i].inserttime,
-                num[i] = i;
-            console.log('current: '+currents[i]);
-            console.log('Temperature: '+temp[i]);
-            console.log('Humidity: '+humi[i]);
-            console.log('Inserttime: '+time[i]);
-        }
-    });
-};
+// function showdata() {
+//     var collection = db.collection('datas');
+//     collection.find({}).toArray(function (err, data) {
+//         for (var i = 0; i < data.length; i++) {
+//             currents[i] = data[i].Currents,
+//                 temp[i] = data[i].Temperature,
+//                 humi[i] = data[i].Humidity,
+//                 time[i] = data[i].inserttime,
+//                 num[i] = i;
+//             console.log('current: '+currents[i]);
+//             console.log('Temperature: '+temp[i]);
+//             console.log('Humidity: '+humi[i]);
+//             console.log('Inserttime: '+time[i]);
+//         }
+//     });
+// };
 
 mqttClient.on('message', function (topic, message) {
   date = new Date(); //get serial port data
   mqtt_data = JSON.parse(message); //serial print turn to JSON -> serialPort_data
-  // console.log(typeof(mqtt_data.Humidity));
   if(typeof(mqtt_data.Humidity) == "number" && typeof(mqtt_data.Temperature) == "number" && typeof(mqtt_data.currents)=="number"){
-    // console.log(mqtt_data);
     humi = mqtt_data.Humidity;  //get data.Humidity (json)
     temp = mqtt_data.Temperature; //get data.Temperature (json)
     currents = mqtt_data.currents; //get data.currents (json)
     plusdata(); // call mongo insert func
-    // console.log(power);
-    power = power + currents * 220 / 3600 / 1000;
-    money = power * price;
+    powerTotal = power + currents * 220 / 3600 / 1000;
+    money = powerTotal * price;
   }
 });
 
@@ -99,7 +98,7 @@ io.sockets.on('connection', function (client) {
             data: currents
           }); //發送資料
           client.emit('power', {
-            data: power
+            data: powerTotal
           }); //發送資料
           client.emit('price', {
             data: price
@@ -162,37 +161,80 @@ router.get('/line',function * (){
   // console.log(endTime);
   // console.log(todayHours);
   // console.log(yesterdayHours);
-  yield function count(done){
-    var collection = db.collection('datas');
-    collection.find({"inserttime":{"$gte":startTime,"$lte":endTime}}).toArray(function (err, data) {
-        for(var i=0 ; i<data.length ; i++){
-          var hours = new Date(data[i].inserttime).getHours();
-          // console.log(hours);
-          if(hours<=new Date().getHours()){
-            currentAry[hours+todayHours]=(currentAry[hours+todayHours]+data[i].Currents)/2;
-            powerAry[hours+todayHours]=powerAry[hours+todayHours]+data[i].Currents*220/1000/60/60;
-            temperatureAry[hours+todayHours]=(temperatureAry[hours+todayHours]+data[i].Temperature)/2;
-            humidityAry[hours+todayHours]=(humidityAry[hours+todayHours]+data[i].Humidity)/2;
-          }else{
-            currentAry[hours-yesterdayHours]=(currentAry[hours-yesterdayHours]+data[i].Currents)/2;
-            powerAry[hours-yesterdayHours]=powerAry[hours-yesterdayHours]+data[i].Currents*220/1000/60/60;
-            temperatureAry[hours-yesterdayHours]=(temperatureAry[hours-yesterdayHours]+data[i].Temperature)/2;
-            humidityAry[hours-yesterdayHours]=(humidityAry[hours-yesterdayHours]+data[i].Humidity)/2;
-          }
+  // yield function count(done){
+  //   var collection = db.collection('datas');
+  //   collection.find({"inserttime":{"$gte":startTime,"$lte":endTime}}).toArray(function (err, data) {
+  //       for(var i=0 ; i<data.length ; i++){
+  //         var hours = new Date(data[i].inserttime).getHours();
+  //         // console.log(hours);
+  //         if(hours<=new Date().getHours()){
+  //           currentAry[hours+todayHours]=(currentAry[hours+todayHours]+data[i].Currents)/2;
+  //           powerAry[hours+todayHours]=powerAry[hours+todayHours]+data[i].Currents*220/1000/60/60;
+  //           temperatureAry[hours+todayHours]=(temperatureAry[hours+todayHours]+data[i].Temperature)/2;
+  //           humidityAry[hours+todayHours]=(humidityAry[hours+todayHours]+data[i].Humidity)/2;
+  //         }else{
+  //           currentAry[hours-yesterdayHours]=(currentAry[hours-yesterdayHours]+data[i].Currents)/2;
+  //           powerAry[hours-yesterdayHours]=powerAry[hours-yesterdayHours]+data[i].Currents*220/1000/60/60;
+  //           temperatureAry[hours-yesterdayHours]=(temperatureAry[hours-yesterdayHours]+data[i].Temperature)/2;
+  //           humidityAry[hours-yesterdayHours]=(humidityAry[hours-yesterdayHours]+data[i].Humidity)/2;
+  //         }
+  //       }
+  //       // console.log(powerAry);
+  //       // console.log(temperatureAry);
+  //       // console.log(humidityAry);
+  //       for(var i=23 ; i>=0 ; i--){
+  //         var count = new Date(endTime).getHours()+i-23;
+  //         if(count>=0){
+  //           timeAry[i]=count;
+  //         }else{
+  //           timeAry[i]=24+count;
+  //         }
+  //         done();
+  //       }
+  //   });
+  // }
+
+  yield function(done){
+      var collection = db.collection('datas');
+      collection.aggregate(
+        [ { $match : {"inserttime":{"$gte":startTime,"$lte":endTime}}},
+        { $group: {
+                    _id: new Date("inserttime").getHours(),
+                    currents:{$avg:"$Currents"},
+                    power:{$sum:"$Currents"},
+                    temperature:{$avg:"$Temperature"},
+                    humidity:{$avg:"$Humidity"}
+                  }
         }
-        // console.log(powerAry);
-        // console.log(temperatureAry);
-        // console.log(humidityAry);
-        for(var i=23 ; i>=0 ; i--){
-          var count = new Date(endTime).getHours()+i-23;
-          if(count>=0){
-            timeAry[i]=count;
-          }else{
-            timeAry[i]=24+count;
-          }
-          done();
-        }
-    });
+     ]).toArray(function(err, results) {
+       for(var i=0 ; i<results.length ; i++){
+         var hours = new Date(results[i]._id).getHours();
+         // console.log(hours);
+         if(hours<=new Date().getHours()){
+           currentAry[hours+todayHours]=results[i].Currents;
+           powerAry[hours+todayHours]=results[i].Currents*220/1000/60/60;
+           temperatureAry[hours+todayHours]=results[i].Temperature;
+           humidityAry[hours+todayHours]=results[i].Humidity;
+         }else{
+           currentAry[hours-yesterdayHours]=results[i].Currents;
+           powerAry[hours-yesterdayHours]=results[i].Currents*220/1000/60/60;
+           temperatureAry[hours-yesterdayHours]=results[i].Temperature;
+           humidityAry[hours-yesterdayHours]=results[i].Humidity;
+         }
+       }
+       // console.log(powerAry);
+       // console.log(temperatureAry);
+       // console.log(humidityAry);
+       for(var i=23 ; i>=0 ; i--){
+         var count = new Date(endTime).getHours()+i-23;
+         if(count>=0){
+           timeAry[i]=count;
+         }else{
+           timeAry[i]=24+count;
+         }
+         done();
+       }
+     });
   }
   this.body = yield render('lineChart',{currentAry:currentAry,
                                         powerAry:powerAry,
@@ -205,12 +247,11 @@ router.get('/icinga',function * (){
     this.body = {
       "humi" : humi,
       "temp" : temp,
-      "currents" : currents,
-      "power" : power
+      "currents" : new Number(currents).toFixed(4),
+      "power" : new Number(powerTotal).toFixed(4)
     }
 });
 
-app.use(serve('./'));
 app.use(router.middleware());
 server.listen(3000, function () {
   console.log('listening on port 3000');
