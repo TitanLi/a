@@ -161,81 +161,83 @@ router.get('/line',function * (){
   // console.log(endTime);
   // console.log(todayHours);
   // console.log(yesterdayHours);
-  // yield function count(done){
-  //   var collection = db.collection('datas');
-  //   collection.find({"inserttime":{"$gte":startTime,"$lte":endTime}}).toArray(function (err, data) {
-  //       for(var i=0 ; i<data.length ; i++){
-  //         var hours = new Date(data[i].inserttime).getHours();
-  //         // console.log(hours);
-  //         if(hours<=new Date().getHours()){
-  //           currentAry[hours+todayHours]=(currentAry[hours+todayHours]+data[i].Currents)/2;
-  //           powerAry[hours+todayHours]=powerAry[hours+todayHours]+data[i].Currents*220/1000/60/60;
-  //           temperatureAry[hours+todayHours]=(temperatureAry[hours+todayHours]+data[i].Temperature)/2;
-  //           humidityAry[hours+todayHours]=(humidityAry[hours+todayHours]+data[i].Humidity)/2;
-  //         }else{
-  //           currentAry[hours-yesterdayHours]=(currentAry[hours-yesterdayHours]+data[i].Currents)/2;
-  //           powerAry[hours-yesterdayHours]=powerAry[hours-yesterdayHours]+data[i].Currents*220/1000/60/60;
-  //           temperatureAry[hours-yesterdayHours]=(temperatureAry[hours-yesterdayHours]+data[i].Temperature)/2;
-  //           humidityAry[hours-yesterdayHours]=(humidityAry[hours-yesterdayHours]+data[i].Humidity)/2;
-  //         }
-  //       }
-  //       // console.log(powerAry);
-  //       // console.log(temperatureAry);
-  //       // console.log(humidityAry);
-  //       for(var i=23 ; i>=0 ; i--){
-  //         var count = new Date(endTime).getHours()+i-23;
-  //         if(count>=0){
-  //           timeAry[i]=count;
-  //         }else{
-  //           timeAry[i]=24+count;
-  //         }
-  //         done();
-  //       }
-  //   });
-  // }
-
-  yield function(done){
-      var collection = db.collection('datas');
-      collection.aggregate(
-        [ { $match : {"inserttime":{"$gte":startTime,"$lte":endTime}}},
-        { $group: {
-                    _id: new Date("inserttime").getHours(),
-                    currents:{$avg:"$Currents"},
-                    power:{$sum:"$Currents"},
-                    temperature:{$avg:"$Temperature"},
-                    humidity:{$avg:"$Humidity"}
-                  }
+  yield function count(done){
+    var collection = db.collection('datas');
+    collection.find({"inserttime":{"$gte":startTime,"$lte":endTime}}).toArray(function (err, data) {
+        for(var i=0 ; i<data.length ; i++){
+          var hours = new Date(data[i].inserttime).getHours();
+          // console.log(hours);
+          if(hours<=new Date().getHours()){
+            currentAry[hours+todayHours]=(currentAry[hours+todayHours]+data[i].Currents)/2;
+            powerAry[hours+todayHours]=powerAry[hours+todayHours]+data[i].Currents*220/1000/60/60;
+            temperatureAry[hours+todayHours]=(temperatureAry[hours+todayHours]+data[i].Temperature)/2;
+            humidityAry[hours+todayHours]=(humidityAry[hours+todayHours]+data[i].Humidity)/2;
+          }else{
+            currentAry[hours-yesterdayHours]=(currentAry[hours-yesterdayHours]+data[i].Currents)/2;
+            powerAry[hours-yesterdayHours]=powerAry[hours-yesterdayHours]+data[i].Currents*220/1000/60/60;
+            temperatureAry[hours-yesterdayHours]=(temperatureAry[hours-yesterdayHours]+data[i].Temperature)/2;
+            humidityAry[hours-yesterdayHours]=(humidityAry[hours-yesterdayHours]+data[i].Humidity)/2;
+          }
         }
-     ]).toArray(function(err, results) {
-       for(var i=0 ; i<results.length ; i++){
-         var hours = new Date(results[i]._id).getHours();
-         // console.log(hours);
-         if(hours<=new Date().getHours()){
-           currentAry[hours+todayHours]=results[i].Currents;
-           powerAry[hours+todayHours]=results[i].Currents*220/1000/60/60;
-           temperatureAry[hours+todayHours]=results[i].Temperature;
-           humidityAry[hours+todayHours]=results[i].Humidity;
-         }else{
-           currentAry[hours-yesterdayHours]=results[i].Currents;
-           powerAry[hours-yesterdayHours]=results[i].Currents*220/1000/60/60;
-           temperatureAry[hours-yesterdayHours]=results[i].Temperature;
-           humidityAry[hours-yesterdayHours]=results[i].Humidity;
-         }
-       }
-       // console.log(powerAry);
-       // console.log(temperatureAry);
-       // console.log(humidityAry);
-       for(var i=23 ; i>=0 ; i--){
-         var count = new Date(endTime).getHours()+i-23;
-         if(count>=0){
-           timeAry[i]=count;
-         }else{
-           timeAry[i]=24+count;
-         }
-         done();
-       }
-     });
+        // console.log(powerAry);
+        // console.log(temperatureAry);
+        // console.log(humidityAry);
+        for(var i=23 ; i>=0 ; i--){
+          var count = new Date(endTime).getHours()+i-23;
+          if(count>=0){
+            timeAry[i]=count;
+          }else{
+            timeAry[i]=24+count;
+          }
+          done();
+        }
+    });
   }
+
+  // yield function(done){
+  //     var collection = db.collection('datas');
+  //     collection.aggregate(
+  //       [ { $match : {"inserttime":{"$gte":1501518400052,"$lte":1521604782052}}},
+  //       { $group: {
+  //                   _id: {$dateToString: { format: "%Y-%m-%d", date: "$inserttime" }},
+  //                   currents:{$avg:"$Currents"},
+  //                   power:{$sum:"$Currents"},
+  //                   temperature:{$avg:"$Temperature"},
+  //                   humidity:{$avg:"$Humidity"}
+  //                 }
+  //       }
+  //    ]).toArray(function(err, results) {
+  //      console.log(results);
+  //      done();
+  //      // for(var i=0 ; i<results.length ; i++){
+  //      //   var hours = new Date(results[i]._id).getHours();
+  //      //   // console.log(hours);
+  //      //   if(hours<=new Date().getHours()){
+  //      //     currentAry[hours+todayHours]=results[i].Currents;
+  //      //     powerAry[hours+todayHours]=results[i].Currents*220/1000/60/60;
+  //      //     temperatureAry[hours+todayHours]=results[i].Temperature;
+  //      //     humidityAry[hours+todayHours]=results[i].Humidity;
+  //      //   }else{
+  //      //     currentAry[hours-yesterdayHours]=results[i].Currents;
+  //      //     powerAry[hours-yesterdayHours]=results[i].Currents*220/1000/60/60;
+  //      //     temperatureAry[hours-yesterdayHours]=results[i].Temperature;
+  //      //     humidityAry[hours-yesterdayHours]=results[i].Humidity;
+  //      //   }
+  //      // }
+  //      // // console.log(powerAry);
+  //      // // console.log(temperatureAry);
+  //      // // console.log(humidityAry);
+  //      // for(var i=23 ; i>=0 ; i--){
+  //      //   var count = new Date(endTime).getHours()+i-23;
+  //      //   if(count>=0){
+  //      //     timeAry[i]=count;
+  //      //   }else{
+  //      //     timeAry[i]=24+count;
+  //      //   }
+  //      //   done();
+  //      // }
+  //    });
+  // }
   this.body = yield render('lineChart',{currentAry:currentAry,
                                         powerAry:powerAry,
                                         temperatureAry:temperatureAry,
