@@ -12,8 +12,17 @@ const io = require('socket.io')(server);
 const serve = require('koa-static');
 const config = require('./config.js');
 const render = require('./lib/render.js');
-const db;
 const mqttClient  = mqtt.connect(config.MQTT);
+
+// define init value
+var db;
+var power = 0;
+var powerTotal = 0;
+var money = 0;
+var price = 1.63;
+var humi = 0;
+var temp = 0;
+var currents = 0;
 
 app.use(logger());
 app.use(serve('./'));
@@ -29,15 +38,6 @@ mqttClient.on('connect', function () {
   console.log('on connect');
   mqttClient.subscribe('current');
 });
-
-// define init value
-var power = 0;
-var powerTotal = 0;
-var money = 0;
-var price = 1.63;
-var humi = 0;
-var temp = 0;
-var currents = 0;
 
 // arduino data insert
 function plusdata(){
