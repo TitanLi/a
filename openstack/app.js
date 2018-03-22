@@ -4,7 +4,7 @@ const logger = require('koa-logger');
 const mqtt  = require('mqtt');
 const views = require('co-views');
 const MongoClient = require('mongodb').MongoClient;
-const ObjectId = require('mongodb').ObjectID;
+const ObjectID = require('mongodb').ObjectID;
 const app = koa();
 const router = new Router();
 const server = require('http').createServer(app.callback());
@@ -23,6 +23,9 @@ var price = 1.63;
 var humi = 0;
 var temp = 0;
 var currents = 0;
+var currentAry,powerAry,temperatureAry,humidityAry,timeAry;
+var collection,date,yesterday;
+var nowHour,correctionToday,correctionYesterday;
 
 app.use(logger());
 app.use(serve('./'));
@@ -34,11 +37,6 @@ MongoClient.connect(config.mongodb,function(err,pDb){
   db = pDb;
 });
 
-mqttClient.on('connect', function () {
-  console.log('on connect');
-  mqttClient.subscribe('current');
-});
-
 // arduino data insert
 function plusdata(){
   var collection = db.collection('datas');
@@ -47,31 +45,18 @@ function plusdata(){
       Humidity:humi,
       Temperature:temp,
       Currents:currents,
-      inserttime:date.getTime(),
+      inserttime:new Date(),
     });
   }
     console.log('insert ok');
 };
-//mongo data find
-// function showdata() {
-//     var collection = db.collection('datas');
-//     collection.find({}).toArray(function (err, data) {
-//         for (var i = 0; i < data.length; i++) {
-//             currents[i] = data[i].Currents,
-//                 temp[i] = data[i].Temperature,
-//                 humi[i] = data[i].Humidity,
-//                 time[i] = data[i].inserttime,
-//                 num[i] = i;
-//             console.log('current: '+currents[i]);
-//             console.log('Temperature: '+temp[i]);
-//             console.log('Humidity: '+humi[i]);
-//             console.log('Inserttime: '+time[i]);
-//         }
-//     });
-// };
+
+mqttClient.on('connect', function () {
+  console.log('on connect');
+  mqttClient.subscribe('current');
+});
 
 mqttClient.on('message', function (topic, message) {
-  date = new Date(); //get serial port data
   mqtt_data = JSON.parse(message); //serial print turn to JSON -> serialPort_data
   if(typeof(mqtt_data.Humidity) == "number" && typeof(mqtt_data.Temperature) == "number" && typeof(mqtt_data.currents)=="number"){
     humi = mqtt_data.Humidity;  //get data.Humidity (json)
@@ -115,28 +100,18 @@ io.sockets.on('connection', function (client) {
 
 router.get('/', function* index() {
   var collection = db.collection('datas');
-  // yield function(done){
-  //   var countPower = 0;
-  //   collection.find({}).toArray(function (err, data) {
-  //       // console.log(data);
-  //       for(var i=0 ; i<data.length ; i++){
-  //         countPower = countPower + data[i].Currents*220/3600/1000;
-  //       }
-  //       console.log(countPower);
-  //       power=countPower;
-  //       done();
-  //   });
-  // }
   yield function(done){
     collection.aggregate([
       {
         $group:{
-          _id:null,
+          _id:new ObjectID(),
           power:{$sum:"$Currents"}
         }
       }
-    ]).toArray(function(err, results) {
-      power = results[0].power*220/3600/1000;
+    ],function(err, results) {
+      if(results.length>0){
+        power = results[0].power*220/3600/1000;
+      }
       done();
     });
   }
@@ -145,99 +120,63 @@ router.get('/', function* index() {
 });
 
 router.get('/line',function * (){
-  var nowMinute = new Date().getMinutes() * 60 * 1000;
-  var nowSeconds = new Date().getSeconds() * 1000;
-  var startTime = new Date().getTime() - (82800000+nowMinute+nowSeconds);
-  var endTime = new Date().getTime();
-  var todayHours = 23 - new Date().getHours();
-  var yesterdayHours = new Date().getHours() + 1;
-  var currentAry = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
-  var powerAry = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
-  var temperatureAry = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
-  var humidityAry = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
-  var timeAry = new Array();
+  currentAry = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+  powerAry = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+  temperatureAry = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+  humidityAry = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+  timeAry = new Array();
 
-  // console.log(startTime);
-  // console.log(endTime);
-  // console.log(todayHours);
-  // console.log(yesterdayHours);
-  yield function count(done){
-    var collection = db.collection('datas');
-    collection.find({"inserttime":{"$gte":startTime,"$lte":endTime}}).toArray(function (err, data) {
-        for(var i=0 ; i<data.length ; i++){
-          var hours = new Date(data[i].inserttime).getHours();
-          // console.log(hours);
-          if(hours<=new Date().getHours()){
-            currentAry[hours+todayHours]=(currentAry[hours+todayHours]+data[i].Currents)/2;
-            powerAry[hours+todayHours]=powerAry[hours+todayHours]+data[i].Currents*220/1000/60/60;
-            temperatureAry[hours+todayHours]=(temperatureAry[hours+todayHours]+data[i].Temperature)/2;
-            humidityAry[hours+todayHours]=(humidityAry[hours+todayHours]+data[i].Humidity)/2;
-          }else{
-            currentAry[hours-yesterdayHours]=(currentAry[hours-yesterdayHours]+data[i].Currents)/2;
-            powerAry[hours-yesterdayHours]=powerAry[hours-yesterdayHours]+data[i].Currents*220/1000/60/60;
-            temperatureAry[hours-yesterdayHours]=(temperatureAry[hours-yesterdayHours]+data[i].Temperature)/2;
-            humidityAry[hours-yesterdayHours]=(humidityAry[hours-yesterdayHours]+data[i].Humidity)/2;
-          }
+  yield function(done){
+      collection = db.collection('datas');
+      date = new Date();
+      yesterday = new Date(new Date().setDate(new Date().getDate()-1));
+      console.log(date,yesterday);
+      collection.aggregate(
+        [ { $match : {"inserttime":{"$gte":new Date(new Date().setDate(new Date().getDate()-1)),"$lte":new Date()}}},
+        { $group: {
+                    _id: {
+                      $hour: {
+                        date: "$inserttime",
+                        timezone: "Asia/Taipei"
+                      }
+                    },
+                    currents:{$avg:"$Currents"},
+                    power:{$sum:"$Currents"},
+                    temperature:{$avg:"$Temperature"},
+                    humidity:{$avg:"$Humidity"}
+                  }
         }
-        // console.log(powerAry);
-        // console.log(temperatureAry);
-        // console.log(humidityAry);
-        for(var i=23 ; i>=0 ; i--){
-          var count = new Date(endTime).getHours()+i-23;
-          if(count>=0){
-            timeAry[i]=count;
-          }else{
-            timeAry[i]=24+count;
-          }
-          done();
+     ]).toArray(function(err, results) {
+       console.log(results);
+       nowHour = new Date().getHours();
+       correctionToday = 23 - nowHour;
+       correctionYesterday = correctionToday - 1;
+       for(var i=0;i<results.length;i++){
+         dbHour = results[i]._id;
+         if(dbHour<=nowHour){
+           currentAry[dbHour+correctionToday] = results[i].currents;
+           powerAry[dbHour+correctionToday] = results[i].power*220/1000/60/60;
+           temperatureAry[dbHour+correctionToday] = results[i].temperature;
+           humidityAry[dbHour+correctionToday] = results[i].humidity;
+         }else{
+           currentAry[dbHour+correctionToday] = results[i].currents;
+           powerAry[dbHour+correctionToday] = results[i].power*220/1000/60/60;
+           temperatureAry[dbHour+correctionToday] = results[i].temperature;
+           humidityAry[dbHour+correctionToday] = results[i].humidity;
+         }
+       }
+       for(var i=23 ; i>=0 ; i--){
+               var count = new Date().getHours()+i-23;
+               if(count>=0){
+                 timeAry[i]=count;
+               }else{
+                 timeAry[i]=24+count;
+               }
+               done();
         }
-    });
+     });
   }
 
-  // yield function(done){
-  //     var collection = db.collection('datas');
-  //     collection.aggregate(
-  //       [ { $match : {"inserttime":{"$gte":1501518400052,"$lte":1521604782052}}},
-  //       { $group: {
-  //                   _id: {$dateToString: { format: "%Y-%m-%d", date: "$inserttime" }},
-  //                   currents:{$avg:"$Currents"},
-  //                   power:{$sum:"$Currents"},
-  //                   temperature:{$avg:"$Temperature"},
-  //                   humidity:{$avg:"$Humidity"}
-  //                 }
-  //       }
-  //    ]).toArray(function(err, results) {
-  //      console.log(results);
-  //      done();
-  //      // for(var i=0 ; i<results.length ; i++){
-  //      //   var hours = new Date(results[i]._id).getHours();
-  //      //   // console.log(hours);
-  //      //   if(hours<=new Date().getHours()){
-  //      //     currentAry[hours+todayHours]=results[i].Currents;
-  //      //     powerAry[hours+todayHours]=results[i].Currents*220/1000/60/60;
-  //      //     temperatureAry[hours+todayHours]=results[i].Temperature;
-  //      //     humidityAry[hours+todayHours]=results[i].Humidity;
-  //      //   }else{
-  //      //     currentAry[hours-yesterdayHours]=results[i].Currents;
-  //      //     powerAry[hours-yesterdayHours]=results[i].Currents*220/1000/60/60;
-  //      //     temperatureAry[hours-yesterdayHours]=results[i].Temperature;
-  //      //     humidityAry[hours-yesterdayHours]=results[i].Humidity;
-  //      //   }
-  //      // }
-  //      // // console.log(powerAry);
-  //      // // console.log(temperatureAry);
-  //      // // console.log(humidityAry);
-  //      // for(var i=23 ; i>=0 ; i--){
-  //      //   var count = new Date(endTime).getHours()+i-23;
-  //      //   if(count>=0){
-  //      //     timeAry[i]=count;
-  //      //   }else{
-  //      //     timeAry[i]=24+count;
-  //      //   }
-  //      //   done();
-  //      // }
-  //    });
-  // }
   this.body = yield render('lineChart',{currentAry:currentAry,
                                         powerAry:powerAry,
                                         temperatureAry:temperatureAry,
