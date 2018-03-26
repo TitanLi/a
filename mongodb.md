@@ -47,6 +47,7 @@ WantedBy=multi-user.target
 ```
 
 ## uninstall
+### method one
 1. Stop MongoDB.
 ```
 $ sudo service mongod stop
@@ -60,7 +61,7 @@ $ sudo apt-get purge mongodb-org*
 $ sudo rm -r /var/log/mongodb
 $ sudo rm -r /var/lib/mongodb
 ```
-4. or
+### method two
 ```
 $ sudo apt-get remove --purge mongodb
 $ sudo apt-get autoremove --purge mongodb
