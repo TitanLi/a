@@ -69,7 +69,7 @@ mqttClient.on('message', function (topic, message) {
       money = powerTotal * price;
     }
   }
-  catah(e){
+  catch(e){
     console.log("JSON error");
   }
 });
