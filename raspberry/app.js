@@ -1,8 +1,9 @@
-var SerialPort = require("serialport");   //10.28.120.28
-var mqtt    = require('mqtt');            //10.21.20.215
-var client  = mqtt.connect('mqtt://10.28.120.28:1883');
+const SerialPort = require("serialport");
+const mqtt = require('mqtt');
+const config = require('./config.js');
+const client  = mqtt.connect(config.MQTT);
 
-var port = new SerialPort("/dev/ttyACM1", {
+var port = new SerialPort(config.serialport, {
     parser: SerialPort.parsers.readline('\n')
 });
 
