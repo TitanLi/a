@@ -23,6 +23,7 @@ var price = 1.63;
 var humi = 0;
 var temp = 0;
 var currents = 0;
+var mqtt_data = {};
 var currentAry,powerAry,temperatureAry,humidityAry,timeAry;
 var collection,date,yesterday;
 var nowHour,correctionToday,correctionYesterday;
@@ -57,14 +58,19 @@ mqttClient.on('connect', function () {
 });
 
 mqttClient.on('message', function (topic, message) {
-  mqtt_data = JSON.parse(message); //serial print turn to JSON -> serialPort_data
-  if(typeof(mqtt_data.Humidity) == "number" && typeof(mqtt_data.Temperature) == "number" && typeof(mqtt_data.currents)=="number"){
-    humi = mqtt_data.Humidity;  //get data.Humidity (json)
-    temp = mqtt_data.Temperature; //get data.Temperature (json)
-    currents = mqtt_data.currents; //get data.currents (json)
-    plusdata(); // call mongo insert func
-    powerTotal = power + currents * 220 / 3600 / 1000;
-    money = powerTotal * price;
+  try{
+    mqtt_data = JSON.parse(message); //serial print turn to JSON -> serialPort_data
+    if(typeof(mqtt_data.Humidity) == "number" && typeof(mqtt_data.Temperature) == "number" && typeof(mqtt_data.currents)=="number"){
+      humi = mqtt_data.Humidity;  //get data.Humidity (json)
+      temp = mqtt_data.Temperature; //get data.Temperature (json)
+      currents = mqtt_data.currents; //get data.currents (json)
+      plusdata(); // call mongo insert func
+      powerTotal = power + currents * 220 / 3600 / 1000;
+      money = powerTotal * price;
+    }
+  }
+  catah(e){
+    console.log("JSON error");
   }
 });
 
