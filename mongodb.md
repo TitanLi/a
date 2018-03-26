@@ -60,3 +60,8 @@ $ sudo apt-get purge mongodb-org*
 $ sudo rm -r /var/log/mongodb
 $ sudo rm -r /var/lib/mongodb
 ```
+4. or
+```
+$ sudo apt-get remove --purge mongodb
+$ sudo apt-get autoremove --purge mongodb
+```
