@@ -55,7 +55,7 @@ $ npm start
 $ cd ./openstack
 //更改設定檔
 $ vim config.js
-$ npm Install
+$ npm install
 $ npm start
 ```
 
