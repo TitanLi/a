@@ -33,6 +33,7 @@ $ npm install -g pm2
 ```
 
 ## 硬體電路
+![硬體電路](https://github.com/TitanLi/power-meter/blob/master/picture/power-meter.png)
 
 ## Arduino for 220V
 ```
