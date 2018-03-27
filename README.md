@@ -35,12 +35,13 @@ $ npm install -g pm2
 ## 硬體電路
 ![硬體電路](https://github.com/TitanLi/power-meter/blob/master/picture/power-meter.png)
 
-## Arduino for 220V
+## 軟體安裝
+### Arduino for 220V
 ```
 ./arduino/_220V/_220V.ino
 ```
 
-## Raspberry pi3 serialport data to MQTT publish
+### Raspberry pi3 serialport data to MQTT publish
 ```
 $ cd ./raspberry
 //更改設定檔
@@ -49,7 +50,7 @@ $ npm install
 $ npm start
 ```
 
-## Openstack service build
+### Openstack service build
 ```
 $ cd ./openstack
 //更改設定檔
@@ -57,3 +58,7 @@ $ vim config.js
 $ npm Install
 $ npm start
 ```
+
+## 成果展示
+![raspberry pi3 & arduino](https://github.com/TitanLi/power-meter/blob/master/picture/IMG20180326170700.jpg)
+![比流器](https://github.com/TitanLi/power-meter/blob/master/picture/IMG20180326170514.jpg)
