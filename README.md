@@ -60,5 +60,5 @@ $ npm start
 ```
 
 ## 成果展示
-<img src="https://github.com/TitanLi/power-meter/blob/master/picture/IMG20180326170700.jpg" alt="raspberry pi3 & arduino" style="width: 50px;"/>
-<img src="https://github.com/TitanLi/power-meter/blob/master/picture/IMG20180326170514.jpg" alt="比流器" style="width: 50px;"/>
+<img src="https://github.com/TitanLi/power-meter/blob/master/picture/IMG20180326170700.jpg" alt="raspberry pi3 & arduino" width="50%"/>
+<img src="https://github.com/TitanLi/power-meter/blob/master/picture/IMG20180326170514.jpg" alt="比流器" width="50%"/>
