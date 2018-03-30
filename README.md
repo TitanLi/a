@@ -62,9 +62,15 @@ $ npm start
 ## 成果展示
 <img src="https://github.com/TitanLi/power-meter/blob/master/picture/IMG20180326170700.jpg" alt="raspberry pi3 & arduino" width="50%"/>
 <img src="https://github.com/TitanLi/power-meter/blob/master/picture/IMG20180326170514.jpg" alt="比流器" width="50%"/>
+
 ![即時電流顯示](https://github.com/TitanLi/power-meter/blob/master/picture/Screenshot from 2018-03-30 23-26-13.png)
+
 ![過去一天內各時段電流平均](https://github.com/TitanLi/power-meter/blob/master/picture/Screenshot from 2018-03-30 23-26-42.png)
+
 ![過去一天內各時段耗功平均](https://github.com/TitanLi/power-meter/blob/master/picture/Screenshot from 2018-03-30 23-29-08.png)
+
 ![過去一天內各時段溫度平均](https://github.com/TitanLi/power-meter/blob/master/picture/Screenshot from 2018-03-30 23-29-20.png)
+
 ![過去一天內各時段溼度平均](https://github.com/TitanLi/power-meter/blob/master/picture/Screenshot from 2018-03-30 23-29-33.png)
+
 ![過去一天內各時段數值比較](https://github.com/TitanLi/power-meter/blob/master/picture/Screenshot from 2018-03-30 23-29-44.png)
