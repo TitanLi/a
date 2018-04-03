@@ -66,3 +66,5 @@ $ sudo rm -r /var/lib/mongodb
 $ sudo apt-get remove --purge mongodb
 $ sudo apt-get autoremove --purge mongodb
 ```
+
+[官方網站](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/)
