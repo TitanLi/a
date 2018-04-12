@@ -156,7 +156,7 @@ router.get('/line',function * (){
        console.log(results);
        nowHour = new Date().getHours();
        correctionToday = 23 - nowHour;
-       correctionYesterday = correctionToday - 1;
+       correctionYesterday = nowHour + 1;
        for(var i=0;i<results.length;i++){
          dbHour = results[i]._id;
          if(dbHour<=nowHour){
@@ -165,10 +165,10 @@ router.get('/line',function * (){
            temperatureAry[dbHour+correctionToday] = results[i].temperature;
            humidityAry[dbHour+correctionToday] = results[i].humidity;
          }else{
-           currentAry[dbHour+correctionToday] = results[i].currents;
-           powerAry[dbHour+correctionToday] = results[i].power*220/1000/60/60;
-           temperatureAry[dbHour+correctionToday] = results[i].temperature;
-           humidityAry[dbHour+correctionToday] = results[i].humidity;
+           currentAry[dbHour-correctionYesterday] = results[i].currents;
+           powerAry[dbHour-correctionYesterday] = results[i].power*220/1000/60/60;
+           temperatureAry[dbHour-correctionYesterday] = results[i].temperature;
+           humidityAry[dbHour-correctionYesterday] = results[i].humidity;
          }
        }
        for(var i=23 ; i>=0 ; i--){
