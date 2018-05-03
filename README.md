@@ -38,7 +38,7 @@ $ npm install -g pm2
 ## 軟體安裝
 ### Arduino for 220V
 
-File@ [_220V.ino](/power-meter/blob/master/arduino/_220V/_220V.ino)
+File@ [_220V.ino](./blob/master/arduino/_220V/_220V.ino)
 
 ### Raspberry pi3 serialport data to MQTT publish
 ```
