@@ -37,24 +37,35 @@ $ npm install -g pm2
 
 ## 軟體安裝
 ### Arduino for 220V
-```
-./arduino/_220V/_220V.ino
-```
+
+File@ [_220V.ino](/power-meter/blob/master/arduino/_220V/_220V.ino)
 
 ### Raspberry pi3 serialport data to MQTT publish
 ```
 $ cd ./raspberry
-//更改設定檔
+```
+* 更改設定檔
+```
 $ vim config.js
+```
+
+* 安裝與開啟服務
+```
 $ npm install
 $ npm start
 ```
 
 ### Openstack service build
+* 移動到[openstack](/power-meter/tree/master/openstack)目錄
 ```
 $ cd ./openstack
-//更改設定檔
+```
+* 更改設定檔
+```
 $ vim config.js
+```
+* 安裝與開啟服務
+```
 $ npm install
 $ npm start
 ```
