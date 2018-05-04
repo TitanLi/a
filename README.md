@@ -1,11 +1,13 @@
 # power-meter
-## 所需環境
+
+## 需求
+### 所需環境
 * node v8.9.4
 * npm v5.6.0
-* mongodb v3.6.3+
+* `mongodb v3.6.3+`
 * pm2 v2.10.1
 
-## 所需材料
+### 所需材料
 * raspberry pi 3
 * arduino
 * 電阻：10kΩ x2、100Ω x1
@@ -32,29 +34,40 @@ $ nvm alias default v8.9.4
 $ npm install -g pm2
 ```
 
-## 硬體電路
+### 硬體電路
 ![硬體電路](https://github.com/TitanLi/power-meter/blob/master/picture/power-meter.png)
+* 註：圖為220V
 
 ## 軟體安裝
 ### Arduino for 220V
-```
-./arduino/_220V/_220V.ino
-```
+File@ [_220V.ino](https://github.com/TitanLi/power-meter/blob/master/arduino/_220V/_220V.ino)
 
 ### Raspberry pi3 serialport data to MQTT publish
 ```
 $ cd ./raspberry
-//更改設定檔
+```
+* 更改設定檔
+```
 $ vim config.js
+```
+
+* 安裝與開啟服務
+```
 $ npm install
 $ npm start
 ```
 
 ### Openstack service build
+* 移動到[openstack](https://github.com/TitanLi/power-meter/tree/master/openstack)目錄
 ```
 $ cd ./openstack
-//更改設定檔
+```
+* 更改設定檔
+```
 $ vim config.js
+```
+* 安裝與開啟服務
+```
 $ npm install
 $ npm start
 ```
