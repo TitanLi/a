@@ -46,6 +46,19 @@ StandardError=syslog
 WantedBy=multi-user.target
 ```
 
+## 對外
+1. 編輯/etc/mongod.conf
+```shell
+$ vim /etc/mongod.conf
+net:
+  port: 27017
+  bindIp: 0.0.0.0
+```
+2. 重啟MongoDB
+```shell
+$ sudo service mongodb restart
+```
+
 ## uninstall
 ### method one
 1. Stop MongoDB.
