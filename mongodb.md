@@ -56,7 +56,7 @@ net:
 ```
 2. 重啟MongoDB
 ```shell
-$ sudo service mongodb restart
+$ sudo service mongod restart
 ```
 
 ## uninstall
